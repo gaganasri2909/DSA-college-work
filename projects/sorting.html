@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sorting Visualizer</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+}
+input {
+    width: 50px;
+    padding: 6px;
+    margin: 4px;
+}
+button, select {
+    padding: 8px 15px;
+    margin: 5px;
+}
+#bars {
+    height: 300px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 30px;
+}
+.bar {
+    width: 40px;
+    background-color: skyblue;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+<h2>Sorting Visualizer</h2>
+<label>Number of elements:</label>
+<input type="number" id="number" value="5" min="2">
+<button onclick="createInputs()">Generate</button>
+<br><br>
+<div id="inputs"></div>
+<br>
+<label>Sorting Algorithm:</label>
+<select id="algorithm" onchange="resetSort()">
+<option value="bubble">Bubble Sort</option>
+<option value="selection">Selection Sort</option>
+<option value="insertion">Insertion Sort</option>
+</select>
+<br><br>
+<button onclick="startSort()">Start</button>
+<button onclick="stepSort()">Step</button>
+<button onclick="stopSort()">Stop</button>
+<button onclick="continueSort()">Continue</button>
+<button onclick="resetSort()">Reset</button>
+<p id="message">Enter your values and select an algorithm</p>
+<div id="bars"></div>
+<script>
+let arr = [];
+let originalArray = [];
+let i = 0;
+let j = 0;
+let key;
+let timer;
+let running = false;
+
+function createInputs() {
+    let number = document.getElementById("number").value;
+    let container = document.getElementById("inputs");
+    container.innerHTML = "";
+    for (let i = 0; i < number; i++) {
+        let input = document.createElement("input");
+        input.type = "number";
+        input.id = "value" + i;
+        input.value = i + 1;
+        container.appendChild(input);
+    }
+    document.getElementById("message").innerHTML = "Enter your values and click Reset";
+}
+
+function getValues() {
+    let number = document.getElementById("number").value;
+    arr = [];
+    for (let i = 0; i < number; i++) {
+        let value = document.getElementById("value" + i).value;
+        arr.push(Number(value));
+    }
+    originalArray = [...arr];
+    i = 0;
+    j = 0;
+    key = null;
+    displayBars();
+}
+
+function displayBars() {
+    let container = document.getElementById("bars");
+    container.innerHTML = "";
+    for (let x = 0; x < arr.length; x++) {
+        let bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = (arr[x] * 20) + "px";
+        bar.innerHTML = arr[x];
+        container.appendChild(bar);
+    }
+}
+
+function stepSort() {
+    let algorithm = document.getElementById("algorithm").value;
+    if (algorithm == "bubble") {
+        bubbleStep();
+    } else if (algorithm == "selection") {
+        selectionStep();
+    } else {
+        insertionStep();
+    }
+}
+
+function bubbleStep() {
+    if (i >= arr.length - 1) {
+        stopSort();
+        document.getElementById("message").innerHTML = "Bubble Sort completed!";
+        return;
+    }
+    if (j >= arr.length - 1 - i) {
+        j = 0;
+        i++;
+    }
+    if (arr[j] > arr[j + 1]) {
+        let temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+    }
+    displayBars();
+    document.getElementById("message").innerHTML = "Bubble Sort: comparing " + arr[j] + " and " + arr[j + 1];
+    j++;
+}
+
+function selectionStep() {
+    if (i >= arr.length - 1) {
+        stopSort();
+        document.getElementById("message").innerHTML = "Selection Sort completed!";
+        return;
+    }
+    if (j == 0) {
+        j = i + 1;
+    }
+    if (j < arr.length) {
+        if (arr[j] < arr[i]) {
+            let temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+        displayBars();
+        document.getElementById("message").innerHTML = "Selection Sort: comparing elements";
+        j++;
+    } else {
+        i++;
+        j = 0;
+    }
+}
+
+function insertionStep() {
+    if (i >= arr.length) {
+        stopSort();
+        document.getElementById("message").innerHTML = "Insertion Sort completed!";
+        return;
+    }
+    if (j == 0) {
+        key = arr[i];
+        j = i - 1;
+    }
+    if (j >= 0 && arr[j] > key) {
+        arr[j + 1] = arr[j];
+        j--;
+        displayBars();
+        document.getElementById("message").innerHTML = "Insertion Sort: shifting";
+    } else {
+        arr[j + 1] = key;
+        displayBars();
+        document.getElementById("message").innerHTML = "Insertion Sort: inserting " + key;
+        i++;
+        j = 0;
+    }
+}
+
+function startSort() {
+    if (arr.length == 0) {
+        getValues();
+    }
+    if (!running) {
+        running = true;
+        timer = setInterval(function() {
+            stepSort();
+        }, 1000);
+    }
+}
+
+function stopSort() {
+    running = false;
+    clearInterval(timer);
+}
+
+function continueSort() {
+    startSort();
+}
+
+function resetSort() {
+    stopSort();
+    getValues();
+    document.getElementById("message").innerHTML = "Ready to sort";
+}
+
+createInputs();
+</script>
+</body>
+</html>
