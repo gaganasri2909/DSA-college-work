@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Auction System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f4f7;
+        }
+
+        header {
+            background-color: #1e3a5f;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px gray;
+        }
+
+        nav button {
+            padding: 10px 18px;
+            margin: 5px;
+            border: none;
+            background-color: #1e3a5f;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        nav button:hover {
+            background-color: #2d5a8a;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+        }
+
+        .section {
+            display: none;
+            background-color: white;
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            flex: 1;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+
+        .card h2 {
+            color: #1e3a5f;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .item-card, .bidder-card, .bid-card {
+            background-color: #f2f4f7;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        .message {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        footer {
+            margin-top: 50px;
+            background-color: #1e3a5f;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Real-Time Auction System</h1>
+    <p>Auto-Bidding and Priority Queue Optimization</p>
+</header>
+
+<nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('bidder')">Register Bidder</button>
+    <button onclick="showSection('items')">Auction Items</button>
+    <button onclick="showSection('bid')">Place Bid</button>
+    <button onclick="showSection('result')">Results</button>
+</nav>
+
+<div class="container">
+
+    <!-- HOME -->
+    <div id="home" class="section active">
+
+        <h2>Welcome to the Auction System</h2>
+
+        <p>
+            This system allows users to register bidders,
+            view auction items, place bids and participate
+            in automatic bidding.
+        </p>
+
+        <div class="cards">
+
+            <div class="card">
+                <h2>Bidder</h2>
+                <p>Register and manage bidders.</p>
+            </div>
+
+            <div class="card">
+                <h2>Auction Items</h2>
+                <p>View available auction items.</p>
+            </div>
+
+            <div class="card">
+                <h2>Live Bidding</h2>
+                <p>Place bids and use auto-bidding.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BIDDER -->
+    <div id="bidder" class="section">
+
+        <h2>Register Bidder</h2>
+
+        <form onsubmit="registerBidder(event)">
+
+            <label>Bidder ID</label><br>
+            <input type="number" id="bidderId" required><br>
+
+            <label>Bidder Name</label><br>
+            <input type="text" id="bidderName" required><br>
+
+            <label>Maximum Bid</label><br>
+            <input type="number" id="maxBid" required><br>
+
+            <label>Auto-Bidding</label><br>
+
+            <select id="autoBid">
+                <option value="1">ON</option>
+                <option value="0">OFF</option>
+            </select><br><br>
+
+            <button class="submit-btn" type="submit">
+                Register Bidder
+            </button>
+
+        </form>
+
+        <p id="bidderMessage" class="message"></p>
+
+        <div id="bidderList"></div>
+
+    </div>
+
+
+    <!-- AUCTION ITEMS -->
+    <div id="items" class="section">
+
+        <h2>Add Auction Item</h2>
+
+        <form onsubmit="addItem(event)">
+
+            <label>Item ID</label><br>
+            <input type="number" id="itemId" required><br>
+
+            <label>Item Name</label><br>
+            <input type="text" id="itemName" required><br>
+
+            <label>Starting Price</label><br>
+            <input type="number" id="startingPrice" required><br><br>
+
+            <button class="submit-btn" type="submit">
+                Add Item
+            </button>
+
+        </form>
+
+        <p id="itemMessage" class="message"></p>
+
+        <div id="itemList"></div>
+
+    </div>
+
+
+    <!-- PLACE BID -->
+    <div id="bid" class="section">
+
+        <h2>Place Bid</h2>
+
+        <form onsubmit="placeBid(event)">
+
+            <label>Bidder ID</label><br>
+            <input type="number" id="bidderBidId" required><br>
+
+            <label>Item ID</label><br>
+            <input type="number" id="bidItemId" required><br>
+
+            <label>Bid Amount</label><br>
+            <input type="number" id="bidAmount" required><br><br>
+
+            <button class="submit-btn" type="submit">
+                Place Bid
+            </button>
+
+        </form>
+
+        <p id="bidMessage" class="message"></p>
+
+        <div id="bidList"></div>
+
+    </div>
+
+
+    <!-- RESULT -->
+    <div id="result" class="section">
+
+        <h2>Auction Results</h2>
+
+        <p>Winner details will be added in Step 6.</p>
+
+    </div>
+
+</div>
+
+
+<footer>
+    <p>Real-Time Auction System | DSA Mini Project</p>
+</footer>
+
+
+<script>
+
+var bidders = [];
+var items = [];
+var bids = [];
+
+
+/* ================= NAVIGATION ================= */
+
+function showSection(sectionName)
+{
+    var sections = document.getElementsByClassName("section");
+
+    for (var i = 0; i < sections.length; i++)
+    {
+        sections[i].classList.remove("active");
+    }
+
+    document.getElementById(sectionName).classList.add("active");
+
+    if (sectionName == "result")
+    {
+        displayResult();
+    }
+}
+
+
+/* ================= BIDDER ================= */
+
+function registerBidder(event)
+{
+    event.preventDefault();
+
+    var id = Number(document.getElementById("bidderId").value);
+    var name = document.getElementById("bidderName").value;
+    var maxBid = Number(document.getElementById("maxBid").value);
+    var autoBid = Number(document.getElementById("autoBid").value);
+
+    var bidder = {
+        id: id,
+        name: name,
+        maxBid: maxBid,
+        autoBid: autoBid
+    };
+
+    bidders.push(bidder);
+
+    document.getElementById("bidderMessage").innerHTML =
+        "Bidder registered successfully!";
+
+    displayBidders();
+
+    document.getElementById("bidderId").value = "";
+    document.getElementById("bidderName").value = "";
+    document.getElementById("maxBid").value = "";
+}
+
+
+function displayBidders()
+{
+    var output = "";
+
+    for (var i = 0; i < bidders.length; i++)
+    {
+        output += `
+            <div class="bidder-card">
+                <b>Bidder ID:</b> ${bidders[i].id}<br>
+                <b>Name:</b> ${bidders[i].name}<br>
+                <b>Maximum Bid:</b> ₹${bidders[i].maxBid}<br>
+                <b>Auto-Bidding:</b>
+                ${bidders[i].autoBid == 1 ? "ON" : "OFF"}
+            </div>
+        `;
+    }
+
+    document.getElementById("bidderList").innerHTML = output;
+}
+
+
+/* ================= AUCTION ITEMS ================= */
+
+function addItem(event)
+{
+    event.preventDefault();
+
+    var id = Number(document.getElementById("itemId").value);
+    var name = document.getElementById("itemName").value;
+    var price = Number(document.getElementById("startingPrice").value);
+
+    var item = {
+        id: id,
+        name: name,
+        startingPrice: price,
+        currentBid: price
+    };
+
+    items.push(item);
+
+    document.getElementById("itemMessage").innerHTML =
+        "Auction item added successfully!";
+
+    displayItems();
+
+    document.getElementById("itemId").value = "";
+    document.getElementById("itemName").value = "";
+    document.getElementById("startingPrice").value = "";
+}
+
+
+function displayItems()
+{
+    var output = "";
+
+    for (var i = 0; i < items.length; i++)
+    {
+        output += `
+            <div class="item-card">
+                <b>Item ID:</b> ${items[i].id}<br>
+                <b>Item Name:</b> ${items[i].name}<br>
+                <b>Starting Price:</b> ₹${items[i].startingPrice}<br>
+                <b>Current Bid:</b> ₹${items[i].currentBid}
+            </div>
+        `;
+    }
+
+    document.getElementById("itemList").innerHTML = output;
+}
+
+
+/* ================= PLACE BID ================= */
+
+function placeBid(event)
+{
+    event.preventDefault();
+
+    var bidderId =
+        Number(document.getElementById("bidderBidId").value);
+
+    var itemId =
+        Number(document.getElementById("bidItemId").value);
+
+    var amount =
+        Number(document.getElementById("bidAmount").value);
+
+    var bidder = null;
+    var item = null;
+
+    for (var i = 0; i < bidders.length; i++)
+    {
+        if (bidders[i].id == bidderId)
+        {
+            bidder = bidders[i];
+            break;
+        }
+    }
+
+    for (var i = 0; i < items.length; i++)
+    {
+        if (items[i].id == itemId)
+        {
+            item = items[i];
+            break;
+        }
+    }
+
+    if (bidder == null)
+    {
+        document.getElementById("bidMessage").innerHTML =
+            "Bidder not found!";
+        return;
+    }
+
+    if (item == null)
+    {
+        document.getElementById("bidMessage").innerHTML =
+            "Auction item not found!";
+        return;
+    }
+
+    if (amount <= item.currentBid)
+    {
+        document.getElementById("bidMessage").innerHTML =
+            "Bid must be greater than current bid!";
+        return;
+    }
+
+    if (amount > bidder.maxBid)
+    {
+        document.getElementById("bidMessage").innerHTML =
+            "Bid exceeds maximum bid!";
+        return;
+    }
+
+    item.currentBid = amount;
+
+    bids.push({
+        bidderId: bidderId,
+        itemId: itemId,
+        amount: amount
+    });
+
+    document.getElementById("bidMessage").innerHTML =
+        "Bid placed successfully!";
+
+    displayBids();
+    displayItems();
+
+    document.getElementById("bidderBidId").value = "";
+    document.getElementById("bidItemId").value = "";
+    document.getElementById("bidAmount").value = "";
+
+    processAutoBid(itemId, bidderId);
+}
+
+
+/* ================= AUTO BIDDING ================= */
+
+function processAutoBid(itemId, currentBidderId)
+{
+    var item = null;
+
+    for (var i = 0; i < items.length; i++)
+    {
+        if (items[i].id == itemId)
+        {
+            item = items[i];
+            break;
+        }
+    }
+
+    if (item == null)
+        return;
+
+    var bestBidder = null;
+
+    for (var i = 0; i < bidders.length; i++)
+    {
+        if (bidders[i].id != currentBidderId &&
+            bidders[i].autoBid == 1 &&
+            bidders[i].maxBid > item.currentBid)
+        {
+            if (bestBidder == null ||
+                bidders[i].maxBid > bestBidder.maxBid)
+            {
+                bestBidder = bidders[i];
+            }
+        }
+    }
+
+    if (bestBidder != null)
+    {
+        var nextBid = item.currentBid + 500;
+
+        if (nextBid <= bestBidder.maxBid)
+        {
+            item.currentBid = nextBid;
+
+            bids.push({
+                bidderId: bestBidder.id,
+                itemId: itemId,
+                amount: nextBid
+            });
+
+            document.getElementById("bidMessage").innerHTML =
+                "Auto-Bidding activated! " +
+                bestBidder.name +
+                " placed ₹" + nextBid;
+
+            displayBids();
+            displayItems();
+        }
+    }
+}
+
+
+/* ================= DISPLAY BIDS ================= */
+
+function displayBids()
+{
+    var output = "";
+
+    for (var i = 0; i < bids.length; i++)
+    {
+        output += `
+            <div class="bid-card">
+                <b>Bidder ID:</b> ${bids[i].bidderId}<br>
+                <b>Item ID:</b> ${bids[i].itemId}<br>
+                <b>Bid Amount:</b> ₹${bids[i].amount}
+            </div>
+        `;
+    }
+
+    document.getElementById("bidList").innerHTML = output;
+}
+
+
+/* ================= AUCTION RESULT ================= */
+
+function displayResult()
+{
+    var result = document.getElementById("result");
+
+    if (bids.length == 0)
+    {
+        result.innerHTML = `
+            <h2>Auction Results</h2>
+            <p>No bids available.</p>
+        `;
+
+        return;
+    }
+
+    var highestBid = bids[0];
+
+    for (var i = 1; i < bids.length; i++)
+    {
+        if (bids[i].amount > highestBid.amount)
+        {
+            highestBid = bids[i];
+        }
+    }
+
+    var winner = null;
+    var item = null;
+
+    for (var i = 0; i < bidders.length; i++)
+    {
+        if (bidders[i].id == highestBid.bidderId)
+        {
+            winner = bidders[i];
+            break;
+        }
+    }
+
+    for (var i = 0; i < items.length; i++)
+    {
+        if (items[i].id == highestBid.itemId)
+        {
+            item = items[i];
+            break;
+        }
+    }
+
+    result.innerHTML = `
+        <h2>🏆 Auction Result</h2>
+
+        <div class="bidder-card">
+
+            <h2>Winner</h2>
+
+            <p>
+                <b>Bidder ID:</b> ${winner.id}
+            </p>
+
+            <p>
+                <b>Winner Name:</b> ${winner.name}
+            </p>
+
+            <p>
+                <b>Item:</b> ${item.name}
+            </p>
+
+            <p>
+                <b>Winning Bid:</b> ₹${highestBid.amount}
+            </p>
+
+            <h3>Auction Status: CLOSED</h3>
+
+        </div>
+    `;
+}
+
+</script>
+
+</body>
+</html>
